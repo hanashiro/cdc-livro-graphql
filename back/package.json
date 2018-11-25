@@ -1,0 +1,17 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "hanashiro",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.4",
+    "express-graphql": "^0.7.1",
+    "graphql": "^14.0.2"
+  }
+}
