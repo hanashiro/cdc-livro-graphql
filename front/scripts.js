@@ -3,7 +3,7 @@ const listaAlunos = document.querySelector('#listaAlunos');
 
 const GraphQl = {
 	endpoint: 'http://localhost:3000',
-	wsConnection: new WebSocket('ws:http://localhost:3000/graphql', 'graphql-subscriptions'),
+	wsConnection: new WebSocket('ws://localhost:3000/graphql', 'graphql-subscriptions'),
 	exec: function(query, variaveis){
 		return fetch(GraphQl.endpoint, {
 		  method: 'POST',

@@ -1,19 +1,9 @@
-const express = require('express'),
-	express_graphql = require('express-graphql'),
-	cors = require('cors'),
-	{ createServer } = require('http'),
+const { ApolloServer } = require('apollo-server'),
 	schema = require('./schema'),
 	resolvers = require('./resolvers');
 
-const app = express();
-const server = createServer(app);
+const server = new ApolloServer({ typeDefs: schema, resolvers });
 
-app.use('/graphql', cors(), express_graphql({
-    schema,
-    rootValue: resolvers,
-    graphiql: true
-}));
-
-server.listen(4000, () => {
-	console.log('servidor funcionando!');
+server.listen(3000).then(() => {
+	console.log(`Servidor funcionando!`);
 });
