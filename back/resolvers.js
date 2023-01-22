@@ -1,4 +1,4 @@
-const { PubSub } = require('apollo-server');
+const { PubSub } = require('graphql-subscriptions');
 const pubsub = new PubSub();
 
 
@@ -23,12 +23,10 @@ const listaAlunos = [
 const resolvers = {
 	Query: {
 		aluno: function(root, args) {  
-			var id = args.id;
-			return listaAlunos.filter(aluno => {
-				return aluno.id == id;
-			})[0];
+			const id = args.id;
+			return listaAlunos.find(aluno => aluno.id == id);
 		},
-		alunoes: function() {
+		alunos: function() {
 			return listaAlunos;
 		}
 	},

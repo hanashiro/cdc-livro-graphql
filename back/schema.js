@@ -1,8 +1,7 @@
-const { gql} = require('apollo-server');
-const schema = gql`
+const schema = `
 type Query {
     aluno(id: ID!): Aluno
-    alunoes: [Aluno]!
+    alunos: [Aluno]!
 }
 
 type Mutation {

@@ -2,8 +2,8 @@ const listaAlunos = document.querySelector('#listaAlunos');
 
 
 const GraphQl = {
-	endpoint: 'http://localhost:3000',
-	wsConnection: new WebSocket('ws://localhost:3000/graphql', 'graphql-subscriptions'),
+	endpoint: 'http://localhost:3000/graphql',
+	wsConnection: new WebSocket('ws://localhost:3000/graphql', 'graphql-transport-ws'),
 	exec: function(query, variaveis){
 		return fetch(GraphQl.endpoint, {
 		  method: 'POST',
@@ -18,24 +18,25 @@ const GraphQl = {
 		return new Promise(resolve => {
 				GraphQl.wsConnection.onopen = function(){
 					const mensagem = {
-								type: 'init'
+								type: 'connection_init'
 					};
 					GraphQl.wsConnection.send(JSON.stringify(mensagem));
 
 					GraphQl.wsConnection.onmessage = function (event) {
 						const resposta = JSON.parse(event.data);
-						if(resposta.type === 'subscription_data'){
+						if(resposta.type === 'connection_ack'){
+							resolve();
+						}
+						if(resposta.type === 'next'){
 							const aluno = resposta.payload.data.aluno;
 							if(aluno.mutation === 'CREATED'){
 								Template.inserirAlunoLista(aluno.node);
 							}else if(aluno.mutation === 'DELETED'){
-								const id = aluno.previousValues.id.replace(/StringIdGCValue\((.*)\)/, '$1');  
+								const id = aluno.previousValues.id;  
 								Template.removerAlunoLista(id);
 							}
 						}
 					}
-
-					resolve();
 			}
 		})
 	}
@@ -46,7 +47,7 @@ const Aluno = {
 	buscar: function(){
 		const query = `
 		query{
-		  alunoes{
+		  alunos{
 		    id
 		    nomeCompleto
 		    idade
@@ -104,8 +105,8 @@ const Aluno = {
 		`;
 		GraphQl.wsConnection.send(JSON.stringify({
 			id: '1',
-			type: 'subscription_start',
-			query
+			type: 'subscribe',
+			payload: { query }
 		}))
 	}
 }
@@ -113,8 +114,8 @@ const Aluno = {
 const Template = {
 	iniciar: function(){
 		Aluno.buscar()
-			.then(({data: {alunoes}}) => {
-				Aluno.lista = alunoes;
+			.then(({data: {alunos}}) => {
+				Aluno.lista = alunos;
 				Template.listarAluno();
 			})
 
@@ -127,7 +128,7 @@ const Template = {
 		})
 		listaAlunos.innerHTML = html;
 	},
-	criarAluno: function(){
+	criarAluno: function(event){
 		event.preventDefault();
 		const formulario = document.forms.novoAluno,
 			novoAluno = {
@@ -148,11 +149,8 @@ const Template = {
 		Aluno.apagar(id);
 	},
 	removerAlunoLista: function(id){
-		const alunoIndice = Aluno.lista.findIndex(aluno => aluno.id === id);
-		if(alunoIndice >= 0){
-			Aluno.lista.splice(alunoIndice, 1);
-			Template.listarAluno();
-		}
+		Aluno.lista = Aluno.lista.filter(aluno => aluno.id !== id);
+		Template.listarAluno();
 	}
 }
 
